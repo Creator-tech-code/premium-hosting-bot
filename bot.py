@@ -564,7 +564,7 @@ try:
 except (TypeError, ValueError):
     KEEPALIVE_PORT = 10000
 
-BRAND       = "ѕιмяαη нoѕтιηg ＲΒOT"
+BRAND       = "SK HOSTING"
 BRAND_VER   = "v2.1"
 BRAND_TAG   = f"{BRAND} {BRAND_VER}"
 SUPPORT_USR = "@Veen0m"
@@ -1262,7 +1262,7 @@ class KeyRing:
         h = kw.pop("headers", {}) or {}
         h.setdefault("Authorization", f"token {self._gh_token()}")
         h.setdefault("Accept", "application/vnd.github+json")
-        h.setdefault("User-Agent", "simran-hosting-rbot/2.1")
+        h.setdefault("User-Agent", "sk-hosting-rbot/2.1")
         try:
             return requests.request(method, url, headers=h, timeout=30, **kw)
         except Exception:
@@ -1824,27 +1824,12 @@ def main_menu_kb(admin: bool = False) -> types.InlineKeyboardMarkup:
         Btn(f" Uᴘʟᴏᴀᴅ Bᴏᴛ",   callback_data="menu_upload",   style="primary"),
     )
     kb.add(
-        Btn(f"Pʟᴀɴꜱ",        callback_data="menu_plans",    style="primary"),
-        Btn(f" Bᴜʏ Pʟᴀɴ",    callback_data="menu_buy",      style="primary"),
-    )
-    kb.add(
-        Btn(f"Rᴇꜰᴇʀʀᴀʟ",    callback_data="menu_referral", style="primary"),
         Btn(f"Pʀᴏꜰɪʟᴇ",      callback_data="menu_profile",  style="primary"),
-    )
-    kb.add(
-        Btn(f" Wᴀʟʟᴇᴛ",     callback_data="menu_wallet",   style="primary"),
-        Btn(f"Tɪᴄᴋᴇᴛꜱ",    callback_data="menu_tickets",  style="primary"),
-    )
-    kb.add(
-        Btn(f" Fʀᴇᴇ Tʀɪᴀʟ",    callback_data="menu_trial",    style="primary"),
-        Btn(f" Cᴏᴜᴘᴏɴ",        callback_data="menu_coupon",   style="primary"),
+        Btn(f"Mʏ Sᴛᴀᴛꜱ",    callback_data="menu_stats",    style="primary"),
     )
     kb.add(
         Btn(f"Hᴇʟᴘ",          callback_data="menu_help",     style="primary"),
         Btn(f"Sᴜᴘᴘᴏʀᴛ", callback_data="menu_support",  style="primary"),
-    )
-    kb.add(
-        Btn(f" Mʏ Sᴛᴀᴛꜱ",    callback_data="menu_stats",    style="primary"),
     )
     if admin:
         kb.add(Btn(f"Aᴅᴍɪɴ Pᴀɴᴇʟ", callback_data="menu_admin", style="danger"))
@@ -3643,11 +3628,7 @@ def delete_bot_doc(bot_id: str) -> None:
 
 
 def user_max_bots(u: Dict[str, Any]) -> int:
-    plan = u.get("plan", "free")
-    default = PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])["max_bots"]
-    # Honor admin override from Settings → Plans Editor.
-    base = int(get_setting(f"plan_max_bots_{plan}", default))
-    return base + int(u.get("bot_slots_bonus", 0))
+    return 9999
 
 
 def user_plan_active(u: Dict[str, Any]) -> bool:
@@ -4387,7 +4368,6 @@ def render_main_menu(chat_id: int, uid: int,
                      call: Optional[types.CallbackQuery] = None,
                      intro: Optional[str] = None) -> None:
     u = db_load()["users"].get(str(uid)) or {}
-    plan = PLAN_LIMITS.get(u.get("plan", "free"), PLAN_LIMITS["free"])
     bots = list_user_bots(uid)
     running = sum(1 for b in bots if b["_id"] in RUNNING and RUNNING[b["_id"]]["proc"].poll() is None)
     intro_block = f"{intro}\n{G['div']}\n" if intro else ""
@@ -4396,10 +4376,7 @@ def render_main_menu(chat_id: int, uid: int,
         f"{G['div_eq']}\n"
         f"{intro_block}"
         f"<b>{sc('Welcome')}</b>, {esc(u.get('name') or 'friend')}\n"
-        f"{bullet('Plan',  plan['name'])}\n"
-        f"{bullet('Until', fmt_ts(u.get('plan_expires')) if u.get('plan_expires') else 'Forever' if plan['price'] == 0 else '—')}\n"
-        f"{bullet('Bots',  f'{len(bots)} / {user_max_bots(u)}  (running {running})')}\n"
-        f"{bullet('Wallet', '{}$'.format(u.get('wallet', 0)))}\n"
+        f"{bullet('Bots',  f'{len(bots)}  (running {running})')}\n"
         f"{G['div']}\n"
         f"Choose an option below.{FOOTER}"
     )
@@ -8107,7 +8084,7 @@ def _gh_api(endpoint: str, token: Optional[str] = None,
     req = _ur.Request(url, method=method, data=body)
     req.add_header("Authorization", f"token {tok}")
     req.add_header("Accept",        "application/vnd.github.v3+json")
-    req.add_header("User-Agent",    "SimranHostingBot/2.0")
+    req.add_header("User-Agent",    "SKHostingBot/2.0")
     if body:
         req.add_header("Content-Type", "application/json")
     with _ur.urlopen(req, timeout=15) as resp:
@@ -9359,7 +9336,7 @@ def action_adm_wh_test(call: types.CallbackQuery) -> None:
         try:
             import urllib.request as _ur
             import json as _j
-            payload = _j.dumps({"test": True, "ts": ts_iso(), "from": "SimranHostingBot"}).encode()
+            payload = _j.dumps({"test": True, "ts": ts_iso(), "from": "SKHostingBot"}).encode()
             req = _ur.Request(wh_url, data=payload, method="POST")
             req.add_header("Content-Type", "application/json")
             with _ur.urlopen(req, timeout=10) as resp:
@@ -10456,7 +10433,7 @@ def _do_export_data(admin_uid: int) -> Path:
     out = BASE_DIR / "exports"
     out.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    target = out / f"simran_export_{stamp}.zip"
+    target = out / f"sk_export_{stamp}.zip"
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
         for name in ("user_data.json", "settings.json", "audit.log",
                      "github_config.json"):
@@ -11898,6 +11875,8 @@ def _handle_bot_upload(m: types.Message) -> None:
             m,
             f"<b>{G['warn']} {sc('Pending admin approval')}</b>\n"
             f"{G['div']}\n"
+            f"{bullet('User',    '{} (@{})'.format(m.from_user.first_name or '', m.from_user.username or '-'))}\n"
+            f"{bullet('User ID', uid)}\n"
             f"{bullet('Bot Name', name)}\n"
             f"{bullet('Files',    len(files_added))}\n"
             f"{bullet('Size',     fmt_bytes(total_size))}\n"
@@ -12876,7 +12855,7 @@ _HELP_PAGES = {
     "main": {
         "title": "📚 Help Centre",
         "text": (
-            "Welcome to <b>Simran Hosting Bot</b>\n\n"
+            "Welcome to <b>SK Hosting Bot</b>\n\n"
             "<b>Quick Start</b>\n"
             "1. Register with /start\n"
             "2. Upload your .py or .zip file\n"
@@ -14536,7 +14515,7 @@ def render_adm_rate_stats(call):
 
 def action_adm_export_full_db(call):
     data  = _export_full_db()
-    fname = f"simran_db_{now_utc().strftime('%Y%m%d_%H%M%S')}.json"
+    fname = f"sk_db_{now_utc().strftime('%Y%m%d_%H%M%S')}.json"
     import io
     bot.send_document(call.message.chat.id, (fname, io.BytesIO(data)),
                       caption=f"<b>📂 Full DB Export</b>\n{bullet('Size', fmt_bytes(len(data)))}",
@@ -14546,7 +14525,7 @@ def action_adm_export_full_db(call):
 
 def action_adm_export_users_csv(call):
     data  = _export_users_csv()
-    fname = f"simran_users_{now_utc().strftime('%Y%m%d')}.csv"
+    fname = f"sk_users_{now_utc().strftime('%Y%m%d')}.csv"
     import io
     bot.send_document(call.message.chat.id, (fname, io.BytesIO(data)),
                       caption=f"<b>👥 Users CSV</b>\n{bullet('Size', fmt_bytes(len(data)))}",
@@ -14556,7 +14535,7 @@ def action_adm_export_users_csv(call):
 
 def action_adm_export_bots_csv(call):
     data  = _export_bots_csv()
-    fname = f"simran_bots_{now_utc().strftime('%Y%m%d')}.csv"
+    fname = f"sk_bots_{now_utc().strftime('%Y%m%d')}.csv"
     import io
     bot.send_document(call.message.chat.id, (fname, io.BytesIO(data)),
                       caption=f"<b>🤖 Bots CSV</b>\n{bullet('Size', fmt_bytes(len(data)))}",
@@ -14566,7 +14545,7 @@ def action_adm_export_bots_csv(call):
 
 def action_adm_export_trans_csv(call):
     data  = _export_transactions_csv()
-    fname = f"simran_transactions_{now_utc().strftime('%Y%m%d')}.csv"
+    fname = f"sk_transactions_{now_utc().strftime('%Y%m%d')}.csv"
     import io
     bot.send_document(call.message.chat.id, (fname, io.BytesIO(data)),
                       caption=f"<b>💳 Transactions CSV</b>\n{bullet('Size', fmt_bytes(len(data)))}",
@@ -14576,7 +14555,7 @@ def action_adm_export_trans_csv(call):
 
 def action_adm_export_audit_csv(call):
     data  = _export_audit_log_csv()
-    fname = f"simran_audit_{now_utc().strftime('%Y%m%d')}.csv"
+    fname = f"sk_audit_{now_utc().strftime('%Y%m%d')}.csv"
     import io
     bot.send_document(call.message.chat.id, (fname, io.BytesIO(data)),
                       caption=f"<b>🔐 Audit CSV</b>\n{bullet('Size', fmt_bytes(len(data)))}",
@@ -14838,7 +14817,7 @@ def tg_channel_backup_now() -> Dict[str, Any]:
                     f"{bullet('Brand', BRAND_TAG)}"
                 ),
                 parse_mode="HTML",
-                visible_file_name=f"simran_backup_{stamp}.zip",
+                visible_file_name=f"sk_backup_{stamp}.zip",
             )
         target.unlink(missing_ok=True)
         audit(0, "tg_channel_backup", f"channel={ch} size={sz}")
@@ -15546,7 +15525,6 @@ def render_main_menu(chat_id: int, uid: int,
                      call: Optional[types.CallbackQuery] = None,
                      intro: Optional[str] = None) -> None:
     u = db_load()["users"].get(str(uid)) or {}
-    plan = PLAN_LIMITS.get(u.get("plan", "free"), PLAN_LIMITS["free"])
     bots = list_user_bots(uid)
     running = sum(1 for b in bots if b["_id"] in RUNNING and RUNNING[b["_id"]]["proc"].poll() is None)
     intro_block = f"{intro}\n{G['div']}\n" if intro else ""
@@ -15557,10 +15535,7 @@ def render_main_menu(chat_id: int, uid: int,
         f"{G['div_eq']}\n"
         f"{intro_block}"
         f"{welcome_line}\n"
-        f"{bullet('Plan', plan['name'])}\n"
-        f"{bullet('Until', fmt_ts(u.get('plan_expires')) if u.get('plan_expires') else 'Forever' if plan['price'] == 0 else '—')}\n"
-        f"{bullet('Bots', str(len(bots)) + ' / ' + str(user_max_bots(u)) + '  (running ' + str(running) + ')')}\n"
-        f"{bullet('Wallet', '{}$'.format(u.get('wallet', 0)))}\n"
+        f"{bullet('Bots', str(len(bots)) + '  (running ' + str(running) + ')')}\n"
         f"{G['div']}\nChoose an option below.{FOOTER}"
     )
     show_menu(chat_id, PHOTOS["main"], cap, main_menu_kb(is_admin(uid)), call=call)
@@ -15745,7 +15720,7 @@ def render_referral(call: types.CallbackQuery) -> None:
         me = bot.get_me()
         link = f"https://t.me/{me.username}?start={uid}"
     except Exception:
-        link = f"https://t.me/SimranRBOT?start={uid}"
+        link = f"https://t.me/SKHostingBot?start={uid}"
     cap = (
         f"<b>{G['users']} {sc('Referral')}</b>\n"
         f"{G['div_eq']}\n"
@@ -17126,7 +17101,7 @@ def render_admin_subroute(call: types.CallbackQuery, data: str) -> None:
                 out = BASE_DIR / "exports"
                 out.mkdir(exist_ok=True)
                 stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-                target = out / f"simran_export_{stamp}.zip"
+                target = out / f"sk_export_{stamp}.zip"
                 with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
                     for name in ("user_data.json", "settings.json", "audit.log"):
                         p = BASE_DIR / "storage" / name
