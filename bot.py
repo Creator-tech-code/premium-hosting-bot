@@ -668,11 +668,11 @@ _TZ_INDEX_DATA = (
 
 PLAN_LIMITS: Dict[str, Dict[str, Any]] = {
     "free":       {"name": "Free",       "max_bots": 2,   "ram": 128,  "auto_restart": False, "price": 0,    "days": 0},
-    "starter":    {"name": "Starter",    "max_bots": 4,   "ram": 256,  "auto_restart": True,  "price": 99,   "days": 30},
-    "basic":      {"name": "Basic",      "max_bots": 6,  "ram": 512,  "auto_restart": True,  "price": 199,  "days": 30},
-    "pro":        {"name": "Pro",        "max_bots": 8,  "ram": 2048, "auto_restart": True,  "price": 499,  "days": 30},
-    "enterprise": {"name": "Enterprise", "max_bots": 10,  "ram": 4096, "auto_restart": True,  "price": 999,  "days": 30},
-    "lifetime":   {"name": "Lifetime",   "max_bots": 15, "ram": 8192, "auto_restart": True,  "price": 1999, "days": 36500},
+    "starter":    {"name": "Starter",    "max_bots": 4,   "ram": 256,  "auto_restart": True,  "price": 406.70,   "days": 30},
+    "basic":      {"name": "Basic",      "max_bots": 6,  "ram": 512,  "auto_restart": True,  "price": 813.40,  "days": 30},
+    "pro":        {"name": "Pro",        "max_bots": 8,  "ram": 2048, "auto_restart": True,  "price": 1332.37,  "days": 30},
+    "enterprise": {"name": "Enterprise", "max_bots": 10,  "ram": 4096, "auto_restart": True,  "price": 1626.80, "days": 30},
+    "lifetime":   {"name": "Lifetime",   "max_bots": 15, "ram": 8192, "auto_restart": True,  "price": 2220.62, "days": 36500},
 }
 
 PAYMENT_METHODS: Dict[str, Dict[str, Any]] = {
@@ -1867,9 +1867,11 @@ def back_kb(target: str, label: str = "Back") -> types.InlineKeyboardMarkup:
         Btn(f"{G['back']}  {sc(label)}", callback_data=target, style="danger"))
 
 
-def plans_kb() -> types.InlineKeyboardMarkup:
+def plans_kb(admin: bool = False) -> types.InlineKeyboardMarkup:
     kb = types.InlineKeyboardMarkup()
     for k, v in PLAN_LIMITS.items():
+        if k == "free" and not admin:
+            continue
         price = "Free" if v["price"] == 0 else f"\u20B9{v['price']}"
         style = "success" if v["price"] == 0 else "primary"
         kb.add(Btn(
@@ -4824,8 +4826,11 @@ def render_upload_menu(call: types.CallbackQuery) -> None:
 
 
 def render_plans_menu(call: types.CallbackQuery) -> None:
+    uid = call.from_user.id
     lines = []
-    for v in PLAN_LIMITS.values():
+    for k, v in PLAN_LIMITS.items():
+        if k == "free" and not is_admin(uid):
+            continue
         price_txt = "Free" if v["price"] == 0 else f"{v['price']}\u20B9"
         detail = f"{v['max_bots']} bots {G['bullet']} {v['ram']} MB RAM {G['bullet']} {price_txt}"
         lines.append(bullet(v['name'], detail))
@@ -4835,7 +4840,7 @@ def render_plans_menu(call: types.CallbackQuery) -> None:
         + "\n".join(lines)
         + f"\n{G['div']}\nTap a plan for full details.{FOOTER}"
     )
-    show_menu(call.message.chat.id, PHOTOS["plans"], cap, plans_kb(), call=call)
+    show_menu(call.message.chat.id, PHOTOS["plans"], cap, plans_kb(is_admin(uid)), call=call)
 
 
 def render_plan_detail(call: types.CallbackQuery, plan: str) -> None:
@@ -4864,12 +4869,13 @@ def render_plan_detail(call: types.CallbackQuery, plan: str) -> None:
 
 
 def render_buy_menu(call: types.CallbackQuery) -> None:
+    uid = call.from_user.id
     cap = (
         f"<b>{G['spark']} {sc('Buy a Plan')}</b>\n"
         f"{G['div_eq']}\n"
         f"{sc('Pick a plan first')}.{FOOTER}"
     )
-    show_menu(call.message.chat.id, PHOTOS["buy"], cap, plans_kb(), call=call)
+    show_menu(call.message.chat.id, PHOTOS["buy"], cap, plans_kb(is_admin(uid)), call=call)
 
 
 def render_payment_methods_for(call: types.CallbackQuery, plan: str) -> None:
@@ -4880,7 +4886,7 @@ def render_payment_methods_for(call: types.CallbackQuery, plan: str) -> None:
         f"<b>{G['wallet']} {sc('Choose Payment Method')}</b>\n"
         f"{G['div_eq']}\n"
         f"{bullet('Plan',  p['name'])}\n"
-        f"{bullet('Price', '{}$'.format(p['price']))}\n"
+        f"{bullet('Price', '{}₹'.format(p['price']))}\n"
         f"{G['div']}\n"
         f"{sc('Pick the method you will pay with')}.{FOOTER}"
     )
@@ -15615,9 +15621,12 @@ def render_upload_menu(call: types.CallbackQuery) -> None:
 
 
 def render_plans_menu(call: types.CallbackQuery) -> None:
+    uid = call.from_user.id
     lines = []
     for key, v in PLAN_LIMITS.items():
-        price_txt = "Free" if v["price"] == 0 else f"{v['price']}$"
+        if key == "free" and not is_admin(uid):
+            continue
+        price_txt = "Free" if v["price"] == 0 else f"\u20B9{v['price']}"
         live_bots = int(get_setting(f"plan_max_bots_{key}", v["max_bots"]))
         detail = f"{live_bots} bots {G['bullet']} {v['ram']} MB RAM {G['bullet']} {price_txt}"
         lines.append(bullet(v["name"], detail))
@@ -15627,7 +15636,7 @@ def render_plans_menu(call: types.CallbackQuery) -> None:
         + "\n".join(lines)
         + f"\n{G['div']}\nTap a plan for full details.{FOOTER}"
     )
-    show_menu(call.message.chat.id, PHOTOS["plans"], cap, plans_kb(), call=call)
+    show_menu(call.message.chat.id, PHOTOS["plans"], cap, plans_kb(is_admin(uid)), call=call)
 
 
 def render_plan_detail(call: types.CallbackQuery, plan: str) -> None:
@@ -15654,11 +15663,12 @@ def render_plan_detail(call: types.CallbackQuery, plan: str) -> None:
 
 
 def render_buy_menu(call: types.CallbackQuery) -> None:
+    uid = call.from_user.id
     cap = (
         f"<b>{G['spark']} {sc('Buy a Plan')}</b>\n"
         f"{G['div_eq']}\n{sc('Pick a plan first')}.{FOOTER}"
     )
-    show_menu(call.message.chat.id, PHOTOS["buy"], cap, plans_kb(), call=call)
+    show_menu(call.message.chat.id, PHOTOS["buy"], cap, plans_kb(is_admin(uid)), call=call)
 
 
 def render_payment_methods_for(call: types.CallbackQuery, plan: str) -> None:
@@ -15669,7 +15679,7 @@ def render_payment_methods_for(call: types.CallbackQuery, plan: str) -> None:
         f"<b>{G['wallet']} {sc('Choose Payment Method')}</b>\n"
         f"{G['div_eq']}\n"
         f"{bullet('Plan', p['name'])}\n"
-        f"{bullet('Price', '{}$'.format(p['price']))}\n"
+        f"{bullet('Price', '{}₹'.format(p['price']))}\n"
         f"{G['div']}\n{sc('Pick the method you will pay with')}.{FOOTER}"
     )
     show_menu(call.message.chat.id, PHOTOS.get("pay", PHOTOS["wallet"]), cap, payments_kb(plan), call=call)
