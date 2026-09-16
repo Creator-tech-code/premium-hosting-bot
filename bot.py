@@ -1824,12 +1824,27 @@ def main_menu_kb(admin: bool = False) -> types.InlineKeyboardMarkup:
         Btn(f" Uᴘʟᴏᴀᴅ Bᴏᴛ",   callback_data="menu_upload",   style="primary"),
     )
     kb.add(
+        Btn(f"Pʟᴀɴꜱ",        callback_data="menu_plans",    style="primary"),
+        Btn(f" Bᴜʏ Pʟᴀɴ",    callback_data="menu_buy",      style="primary"),
+    )
+    kb.add(
+        Btn(f"Rᴇꜰᴇʀʀᴀʟ",    callback_data="menu_referral", style="primary"),
         Btn(f"Pʀᴏꜰɪʟᴇ",      callback_data="menu_profile",  style="primary"),
-        Btn(f"Mʏ Sᴛᴀᴛꜱ",    callback_data="menu_stats",    style="primary"),
+    )
+    kb.add(
+        Btn(f" Wᴀʟʟᴇᴛ",     callback_data="menu_wallet",   style="primary"),
+        Btn(f"Tɪᴄᴋᴇᴛꜱ",    callback_data="menu_tickets",  style="primary"),
+    )
+    kb.add(
+        Btn(f" Fʀᴇᴇ Tʀɪᴀʟ",    callback_data="menu_trial",    style="primary"),
+        Btn(f" Cᴏᴜᴘᴏɴ",        callback_data="menu_coupon",   style="primary"),
     )
     kb.add(
         Btn(f"Hᴇʟᴘ",          callback_data="menu_help",     style="primary"),
         Btn(f"Sᴜᴘᴘᴏʀᴛ", callback_data="menu_support",  style="primary"),
+    )
+    kb.add(
+        Btn(f" Mʏ Sᴛᴀᴛꜱ",    callback_data="menu_stats",    style="primary"),
     )
     if admin:
         kb.add(Btn(f"Aᴅᴍɪɴ Pᴀɴᴇʟ", callback_data="menu_admin", style="danger"))
@@ -4368,6 +4383,7 @@ def render_main_menu(chat_id: int, uid: int,
                      call: Optional[types.CallbackQuery] = None,
                      intro: Optional[str] = None) -> None:
     u = db_load()["users"].get(str(uid)) or {}
+    plan = PLAN_LIMITS.get(u.get("plan", "free"), PLAN_LIMITS["free"])
     bots = list_user_bots(uid)
     running = sum(1 for b in bots if b["_id"] in RUNNING and RUNNING[b["_id"]]["proc"].poll() is None)
     intro_block = f"{intro}\n{G['div']}\n" if intro else ""
@@ -4376,7 +4392,10 @@ def render_main_menu(chat_id: int, uid: int,
         f"{G['div_eq']}\n"
         f"{intro_block}"
         f"<b>{sc('Welcome')}</b>, {esc(u.get('name') or 'friend')}\n"
+        f"{bullet('Plan',  plan['name'])}\n"
+        f"{bullet('Until', fmt_ts(u.get('plan_expires')) if u.get('plan_expires') else 'Forever' if plan['price'] == 0 else '—')}\n"
         f"{bullet('Bots',  f'{len(bots)}  (running {running})')}\n"
+        f"{bullet('Wallet', '{}$'.format(u.get('wallet', 0)))}\n"
         f"{G['div']}\n"
         f"Choose an option below.{FOOTER}"
     )
@@ -15525,6 +15544,7 @@ def render_main_menu(chat_id: int, uid: int,
                      call: Optional[types.CallbackQuery] = None,
                      intro: Optional[str] = None) -> None:
     u = db_load()["users"].get(str(uid)) or {}
+    plan = PLAN_LIMITS.get(u.get("plan", "free"), PLAN_LIMITS["free"])
     bots = list_user_bots(uid)
     running = sum(1 for b in bots if b["_id"] in RUNNING and RUNNING[b["_id"]]["proc"].poll() is None)
     intro_block = f"{intro}\n{G['div']}\n" if intro else ""
@@ -15535,7 +15555,10 @@ def render_main_menu(chat_id: int, uid: int,
         f"{G['div_eq']}\n"
         f"{intro_block}"
         f"{welcome_line}\n"
+        f"{bullet('Plan', plan['name'])}\n"
+        f"{bullet('Until', fmt_ts(u.get('plan_expires')) if u.get('plan_expires') else 'Forever' if plan['price'] == 0 else '—')}\n"
         f"{bullet('Bots', str(len(bots)) + '  (running ' + str(running) + ')')}\n"
+        f"{bullet('Wallet', '{}$'.format(u.get('wallet', 0)))}\n"
         f"{G['div']}\nChoose an option below.{FOOTER}"
     )
     show_menu(chat_id, PHOTOS["main"], cap, main_menu_kb(is_admin(uid)), call=call)
