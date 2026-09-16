@@ -567,7 +567,7 @@ except (TypeError, ValueError):
 BRAND       = "SK HOSTING"
 BRAND_VER   = "v2.1"
 BRAND_TAG   = f"{BRAND} {BRAND_VER}"
-SUPPORT_USR = "@Veen0m"
+SUPPORT_USR = "@sk_1808999"
 UPDATE_CH   = "https://t.me/jtrertyjr"
 FOOTER      = f"\n\n<blockquote>{BRAND_TAG}</blockquote>"
 
