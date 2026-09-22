@@ -537,7 +537,7 @@ KEYRING_FILE  = DIRS["data"] / "keyring.json"   # tiny local cache only
 # ┌──────────────────────────────────────────────────────────────┐
 # │  BOT TOKEN  add karo.   ││
 # └──────────────────────────────────────────────────────────────┘
-BOT_TOKEN_HARDCODED = "8802494201:AAGLeyIvHOIYyx2_1xUzi42SR1mRwjpsSEw"   # ← ADD BOT TOKEN
+BOT_TOKEN_HARDCODED = "8823756890:AAF3X14Sj4hcSheq5o6YSFHimt1rgwv2UHM"   # ← ADD BOT TOKEN
 TOKEN = (
     os.environ.get("BOT_TOKEN")
     or os.environ.get("MAIN_BOT_TOKEN")
@@ -546,7 +546,7 @@ TOKEN = (
     or ""
 ).strip()
 try:
-    OWNER_ID = int(os.environ.get("OWNER_ID", "7454319617"))
+    OWNER_ID = int(os.environ.get("OWNER_ID", "8780852437"))
 except (TypeError, ValueError):
     OWNER_ID = 0
 if not TOKEN:
